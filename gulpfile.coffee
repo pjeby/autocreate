@@ -18,6 +18,8 @@ gulp.task 'test', ['build'], ->
     gulp.src 'spec.*coffee'
     .pipe mocha
         reporter: "spec"
+        useColors: yes
+        fullStackTrace: yes
         #bail: yes
     .on "error", (err) ->
         console.log err.toString()
