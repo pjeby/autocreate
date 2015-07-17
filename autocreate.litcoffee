@@ -88,7 +88,9 @@ etc. as the wrapped class.
 
 If we're in an ES5+ environment, we can query and define property descriptors,
 so we should copy them.  TypeScript and CoffeeScript don't use them, but
-Babel depends on them.
+Babel depends on them.  (IE8 has `getOwnPropertyDescriptor()` and
+`defineProperty()`, but not `getOwnPropertyNames()`, so we won't end up using
+its broken DOM-only junk.)
 
     getDesc = Object.getOwnPropertyDescriptor
     defProp = Object.defineProperty
@@ -116,8 +118,6 @@ But if the property doesn't exist on the destination, or is configurable, we
 can go ahead and redefine it.  For simplicity's sake, errors are ignored.
 
                 try defProp(dst, k, getDesc(src, k))
-
-
 
 
 
