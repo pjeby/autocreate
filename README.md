@@ -26,11 +26,11 @@ auto = require('autocreate');
 }
 ```
 
-For more usage details, including code samples for all of the supported languages, see the "Usage Examples" section, below.  (`autocreate` will also *probably* work with most other compile-to-Javascript languages; read the "Implementation Details" section for more info!)
+For more usage details, including code samples for all of the supported languages, see the "Usage" section, below.  (`autocreate` will also *probably* work with most other compile-to-Javascript languages; read the "Implementation Details" section for more info!)
 
 `autocreate` supports even the most exotic class features of its supported languages, including static methods and properties, automatically bound methods, etc. -- even non-enumerable property descriptors and getter/setters.
 
-It does not, however, depend on any particular version of Javascript as its execution environment: if you're using a language and featureset that works on old versions of IE, then `autocreate` will work there too.  If you're targeting an ES5 or ES6 environment, no problem: `autocreate` will detect the relevant features (descriptors, symbols, `__proto__`, etc.) and progressively enhance itself to support them.
+It does not, however, depend on any particular version of Javascript as its execution environment: if you're using a language whose features work on old versions of IE, then `autocreate` will work there too!  If you're targeting an ES5 or ES6 environment, no problem: `autocreate` will detect the relevant features (descriptors, symbols, `__proto__`, etc.) and progressively enhance itself to support them.
 
 
 #### Contents
@@ -179,6 +179,8 @@ Determining the correct way to do this in the language of your choice (other tha
 `autocreate` respects the standard Javascript rules for constructor return values.  If your wrapped constructor returns an object or function, it will be returned in place of the newly-created instance -- regardless of whether the wrapper was called with `new` or not.
 
 On the other hand, if you supply a `__class_call__` method, its return value will *always* be returned from the wrapper, regardless of type.  This allows the class to behave like a normal function, when it's called as one.
+
+(Of course, if you *want* your `__class_call__` to return an instance, you can create one via `new this.constructor(...)`, because `this` in a `__class_call__` is equal to the class's `.prototype`.)
 
 ### Inheritance
 
