@@ -1,0 +1,38 @@
+{
+  "name": "autocreate",
+  "version": "1.0.0",
+  "description": "`new`-less classes for ES7/Babel, TypeScript, CoffeeScript, etc.",
+  "repository": "git@github.com:pjeby/autocreate.git",
+  "homepage": "https://github.com/pjeby/autocreate",
+  "main": "autocreate.js",
+  "files": [
+    "autocreate.js"
+  ],
+  "scripts": {
+    "test": "gulp test",
+    "prepublish": "gulp build"
+  },
+  "keywords": [
+    "class",
+    "classes",
+    "constructors",
+    "new",
+    "Babel",
+    "TypeScript",
+    "CoffeeScript"
+  ],
+  "author": "PJ Eby <pje@telecommunity.com>",
+  "license": "ISC",
+  "devDependencies": {
+    "gulp": "^3.8.0",
+    "gulp-coffee": "^2.3.1",
+    "gulp-mocha": "^0.4.1",
+    "coffee-script": "^1.9.3",
+    "mocha": "^1.18.2",
+    "chai": "^1.9.1",
+    "sinon": "^1.9.1",
+    "sinon-chai": "^2.5.0"
+  },
+  "dependencies": {
+  }
+}
