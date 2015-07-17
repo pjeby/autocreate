@@ -1,6 +1,6 @@
 # autocreate
 
-Sometimes, you need something to be both a class and a function.  Sometimes, you need a class to be callable without using `new`.  The `autocreate` module makes both as easy as typing `@auto` before your class declaration (in Babel/ES7 or TypeScript), and *almost* that easy in CoffeeScript or plain Javascript.  (And there are probably ways to use it with other compile-to-Javascript languages, too!)
+Sometimes, you need something to be both a class and a function.  Sometimes, you need a class to be callable without using `new`.  The `autocreate` module makes both as easy as typing `@auto` before your class declaration (in Babel/ES7 or TypeScript), and *almost* that easy in CoffeeScript or plain Javascript.
 
 ```javascript
 auto = require('autocreate');
@@ -13,13 +13,24 @@ auto = require('autocreate');
 }
 ```
 
-(For more usage details, including examples for other languages, see the "Usage" section, below.)
+`autocreate` also includes a special hook method that you can define to customize what happens when the class is called without `new`.  That way, you can return an object from a cache, return an object that was passed in (like `Object(obj)` does), or generaly do things differently when invoked without `new`:
 
-`autocreate` supports even the most exotic class features of these languages, including static methods and properties, automatically bound methods, etc. -- even non-enumerable property descriptors and getter/setters.
+```javascript
+@auto class dualUse {
+  constructor() {
+    // this is called if you use `new dualUse()`
+  }
+  __class_call__() {
+    // this is called if you use `dualUse()`
+  }
+}
+```
+
+For more usage details, including code samples for all of the supported languages, see the "Usage Examples" section, below.  (`autocreate` will also *probably* work with most other compile-to-Javascript languages; read the "Implementation Details" section for more info!)
+
+`autocreate` supports even the most exotic class features of its supported languages, including static methods and properties, automatically bound methods, etc. -- even non-enumerable property descriptors and getter/setters.
 
 It does not, however, depend on any particular version of Javascript as its execution environment: if you're using a language and featureset that works on old versions of IE, then `autocreate` will work there too.  If you're targeting an ES5 or ES6 environment, no problem: `autocreate` will detect the relevant features (descriptors, symbols, `__proto__`, etc.) and progressively enhance itself to support them.
-
-Last, but not least, `autocreate` includes a special hook method that you can define to customize what happens when the class is called without `new`.  That way, you can return an object from a cache, return an object that was passed in (like `Object(obj)` does), or generaly do things differently when invoked without `new`.
 
 
 #### Contents
@@ -167,11 +178,11 @@ Determining the correct way to do this in the language of your choice (other tha
 
 `autocreate` respects the standard Javascript rules for constructor return values.  If your wrapped constructor returns an object or function, it will be returned in place of the newly-created instance -- regardless of whether the wrapper was called with `new` or not.
 
-On the other hand, if you supply a `__class_call__` method, its return value will *always* be returned from the wrapper, regardless of type.  This allows the wrapped constructor to behave as a normal function, when it's called as one.
+On the other hand, if you supply a `__class_call__` method, its return value will *always* be returned from the wrapper, regardless of type.  This allows the class to behave like a normal function, when it's called as one.
 
 ### Inheritance
 
-If you create a subclass of an `autocreate` class, you should make it `autocreate` as well.  This is because it's impossible for a constructor to know whether it's being called directly, or via a subclass `super` call.  Thus, even though the base class can tell that it wasn't invoked with `new`, it *can't* tell *which* class it should create an instance of!
+If you create a subclass of an `autocreate` class, you should make it `autocreate` as well.  This is because it's impossible for a constructor to know whether it's being called directly, or via a subclass `super` call.  Thus, even though the base class can tell it wasn't invoked with `new`, it can't tell *which* class it should create an instance of!
 
 Also, you should be aware that since `__class_call__` is a normal instance method, it is automatically inherited by subclasses.  If you don't want the subclasses to respond to it, you can override the method in the subclasses, or you can write the method like this (Babel/ES7):
 
