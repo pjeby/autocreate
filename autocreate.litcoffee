@@ -8,8 +8,8 @@ original class, and take care of detecting when `new` has or hasn't been
 called.
 
     module.exports = auto = (cons) ->
-
-        proto = cons.prototype
+        
+        proto = (create = ->).prototype = cons.prototype
 
         cls = copyProps(cons, named(cons, ->
 
@@ -29,52 +29,11 @@ Otherwise, we fall back to creating an instance, then applying the constructor
 to it, emulating Javascript's native behavior for constructor return values.
 
             else
-                inst = create(proto)
+                inst = new create()
                 ret = cons.apply(inst, arguments)
                 if Object(ret) is ret then ret else inst
             )
         )
-
-Object creation is handled using an ES3 polyfill for single-argument
-`Object.create()`.  We always use it, even when `Object.create()` is around,
-because some engines run faster with objects made by `new`.
-
-The polyfill works by setting its own `.prototype`, then calling `new` on
-itself in such a way that the prototype is immediately cleared, preventing a
-dangling reference.
-
-    create = (proto) ->
-        create.prototype = proto
-        return new create() if proto
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 
