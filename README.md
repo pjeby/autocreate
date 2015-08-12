@@ -2,7 +2,9 @@
 
 Sometimes, you need something to be both a class and a function.  Sometimes, you need a class to be callable without using `new`.  The `autocreate` module makes both as easy as typing `@auto` before your class declaration (in Babel/ES7 or TypeScript), and *almost* that easy in CoffeeScript or plain Javascript.
 
-```javascript
+<!--mockdown-setup: languages.js = 'babel'; languages.babel.options.stage=0; -->
+
+```js
 auto = require('autocreate');
 
 @auto class MyClass {
@@ -15,7 +17,7 @@ auto = require('autocreate');
 
 `autocreate` also includes a special hook method that you can define to customize what happens when the class is called without `new`.  That way, you can return an object from a cache, return an object that was passed in (like `Object(obj)` does), or generaly do things differently when invoked without `new`:
 
-```javascript
+```js
 @auto class dualUse {
   constructor() {
     // this is called if you use `new dualUse()`
@@ -54,7 +56,7 @@ It does not, however, depend on any particular version of Javascript as its exec
 
 ##### In TypeScript (or Babel w/ES7 features enabled)
 
-```javascript
+```js
 auto = require('autocreate');
 
 @auto class MyClass {
@@ -90,13 +92,13 @@ MyClass = auto(MyClass);
 function MyClass () {
   // No need to check for `this instanceof`;
   // just do whatever needs doing.
-});
+};
 ```
 
 #### Create a class with separate "function" behavior
 
 ##### In TypeScript (or Babel w/ES7 features enabled)
-```javascript
+```js
 @auto class MyClass {
   constructor() {
     // This will run if `new MyClass()` is used
@@ -127,7 +129,7 @@ MyClass = auto(MyClass);
 
 function MyClass () {
   // This will run if `new MyClass()` is used
-});
+};
 
 MyClass.prototype.__class_call__ = function () {
   // This will run if `MyClass()` is called:
@@ -188,7 +190,7 @@ If you create a subclass of an `autocreate` class, you should make it `autocreat
 
 Also, you should be aware that since `__class_call__` is a normal instance method, it is automatically inherited by subclasses.  If you don't want the subclasses to respond to it, you can override the method in the subclasses, or you can write the method like this (Babel/ES7):
 
-```javascript
+```js
 @auto class BaseClass {
   __class_call__() {
     if (this !== BaseClass.prototype) {
@@ -206,3 +208,28 @@ Also, you should be aware that since `__class_call__` is a normal instance metho
 ```
 
 This will then return a `Subclass` instance when you call `Subclass()` without `new`, but fall through to whatever special handling you've set up when you call `BaseClass()` without `new`.
+
+### Programmatic Subclass Creation
+
+As a convenience feature for metaprogramming, `autocreate` exposes a `.subclass(name?, base, props?)` utility function for creating ES6-style subclasses of `base` with the given `name` and descriptors (`props`).  If `name` is null or omitted, the base class name is used.  Static properties are inherited via `__proto__`:
+
+```js
+let sub = auto.subclass('sub', BaseClass, {foo: {value: "bar"}});
+
+BaseClass.somethingStatic = 42;
+
+console.log(sub.name);
+console.log(sub.somethingStatic);
+
+console.log(sub().foo);
+console.log(sub() instanceof sub);
+console.log(sub() instanceof BaseClass);
+```
+
+>     sub
+>     42
+>     bar
+>     true
+>     true
+ 
+Note that this function doesn't allow you to change the base class's constructor behavior, though you can of course define a new `__class_call__` in the subclass's properties.  It's mainly useful for creating ES5/ES6-style subclasses when your favorite language only does ES3-style inheritance.

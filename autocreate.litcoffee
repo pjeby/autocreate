@@ -7,11 +7,11 @@ constructor.  The wrapper should have the same name and properties as the
 original class, and take care of detecting when `new` has or hasn't been
 called.
 
-    module.exports = auto = (cons) ->
-        
-        proto = (create = ->).prototype = cons.prototype
+    module.exports = auto = (cons) -> mkAuto(cons)
 
-        cls = copyProps(cons, named(cons, ->
+    mkAuto = (cons, name = cons.name, copier = copyProps) ->
+
+        cls = copier(cons, named(name, cons, ->
 
 If we were called with `new`, then `this` will an instance of the current class,
 and we can just apply the constructor.
@@ -22,8 +22,8 @@ and we can just apply the constructor.
 If we weren't called with a valid instance, but the prototype has a
 `__class_call__` method, we invoke that and return whatever it returns.
 
-            else if cc = proto.__class_call__
-                cc.apply(proto, arguments)
+            else if cc = cls::__class_call__
+                cc.apply(cls::, arguments)
 
 Otherwise, we fall back to creating an instance, then applying the constructor
 to it, emulating Javascript's native behavior for constructor return values.
@@ -35,8 +35,8 @@ to it, emulating Javascript's native behavior for constructor return values.
             )
         )
 
-
-
+        (create = ->):: = cls::
+        return cls
 
 
 ## Wrapper Properties
@@ -101,23 +101,23 @@ so that instances' "class" is the wrapper, not the wrapped constructor.
         dst
 
 
+## ES6 Subclassing Utility
 
+As a convenience, `auto.subclass(name?, cls, props?)` returns an ES6-style
+subclass of `cls`, with a class named `name`, properties defined by `props`,
+and static property inheritance based on `__proto__`.  If `name` is
+null/undefined or omitted, `cls.name` is used.
 
+    auto.subclass = (name, base, props) ->
 
+        if typeof name is "function"
+            props = base; base = name; name = base.name
 
-
-
-
-
-
-
-
-
-
-
-
-
-
+        return mkAuto base, name, (src, dst) ->
+            dst.prototype = Object.create(base.prototype, props)
+            dst.prototype.constructor = dst
+            dst.__proto__ = src
+            return dst
 
 
 
@@ -133,7 +133,10 @@ name.  (At which point, we might as well try to give it the same length.)
 will fail, so we need to catch any error from that and just give up at that
 point.)
 
-    named = (src, dst) ->
+    named = (name, src, dst) ->
+
+        src = {name, length: src.length}
+
         for prop in ['name', 'length']
 
             if dst[prop] isnt src[prop]
@@ -142,22 +145,19 @@ point.)
             if dst[prop] isnt src[prop]
                 try Object.defineProperty(dst, prop, value: src[prop])
 
-        if dst.name isnt src.name or dst.length isnt src.length
+        if dst.name isnt name or dst.length isnt src.length
             args =""
             args = "arg"+[1..src.length].join(', arg') if src.length
 
             try dst = new Function(
-                '$$'+src.name, body = """\
+                '$$'+name, body = """\
                 return function NAME(#{args}) {
                     return $$NAME.apply(this, arguments);
                 }
-                """.replace /NAME/g, src.name
+                """.replace /NAME/g, name
             )(dst)
 
         return dst
-
-
-
 
 
 

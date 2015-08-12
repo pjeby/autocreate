@@ -80,7 +80,7 @@ describe "auto(constructor)", ->
 
 
 
-    describe "when called", (my) ->       
+    describe "when called", (my) ->
 
         beforeEach -> @setup = (check = ->) ->
             my = this
@@ -108,7 +108,7 @@ describe "auto(constructor)", ->
 
                 it "that is also an instanceof wrapper", ->
                     my = this
-                    @setup -> expect(this).to.be.instanceOf(my.original)                    
+                    @setup -> expect(this).to.be.instanceOf(my.original)
                     new @cls()
                     @invoked.should.have.been.calledOnce
 
@@ -128,7 +128,7 @@ describe "auto(constructor)", ->
                 beforeEach ->
                     @setup()
                     @cls::__class_call__ = @cc = spy.named 'cc'
-                    
+
                 it "with all arguments", ->
                     @cls(99, 42)
                     @invoked.should.not.have.been.called
@@ -139,7 +139,7 @@ describe "auto(constructor)", ->
                     @cls(99, 42)
                     @cc.should.have.been.calledOnce
                     @cc.should.have.been.calledOn(@cls::)
-                    
+
                 it "returning its return value", ->
                     @cls::__class_call__ = @cc = spy.named 'cc', -> 42
                     expect(@cls()).to.equal 42
@@ -174,6 +174,47 @@ describe "auto(constructor)", ->
                         @setup -> anObj
                         expect(@cls()).to.equal anObj
                         @invoked.should.have.been.calledOnce
+
+describe "auto.subclass(name?, base, props?)", ->
+
+    class base
+        @blue: 42
+        foo: "baz"
+
+    checkInherits = (s, name='base') ->
+        s.name.should.equal name
+        s::constructor.should.equal s
+        s.blue.should.equal 42
+        s().foo.should.equal 'baz'
+
+    it "works with just a base", ->
+        checkInherits auto.subclass(base)
+
+    it "works with a name", ->
+        checkInherits auto.subclass('foo', base), 'foo'
+
+    it "works with empty name", ->
+        checkInherits auto.subclass(null, base)
+        checkInherits auto.subclass(undefined, base)
+
+    it "defines properties", ->
+        checkInherits(s = auto.subclass(base, x: value: 99))
+        s().x.should.equal 99
+        checkInherits(s = auto.subclass('base', base, x: value: 99))
+        s().x.should.equal 99
+
+require('mockdown').testFiles(['README.md'], describe, it, skip: no, globals:
+    require: (arg) -> if arg is 'autocreate' then auto else require(arg)
+
+    # Fixture for CoffeeScript class examples
+    foo: do ->
+        foo = -> Baz: {}
+        foo.bar = {}
+        foo
+)
+
+
+
 
 
 
