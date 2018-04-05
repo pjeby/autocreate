@@ -170,10 +170,10 @@ class foo('Bar')['Baz'].Spam
   Spam = auto @         # even with expressions!
 
 class
-  _Class = auto @       # an anonymous class
+  _Class = auto @       # an anonymous class -- CoffeeScript 1.x only
 
 class foo('Bar')['Baz']
-  _Class = auto @       # no last .name
+  _Class = auto @       # no last .name -- CoffeeScript 1.x only
 ```
 
 Determining the correct way to do this in the language of your choice (other than Babel, TypeScript, CoffeeScript, etc.) is left as an exercise for the reader.  (Take a look at the code your language generates for a class statement, or if it has an online interactive "playground" the way Babel, TS, and CS do, even better!)
