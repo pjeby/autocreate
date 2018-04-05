@@ -1,5 +1,7 @@
 # autocreate
 
+> New in 1.2: support for using `auto` with native ES6 class objects.  (Previous versions only worked on transpiled emulations.)
+
 Sometimes, you need something to be both a class and a function.  Sometimes, you need a class to be callable without using `new`.  The `autocreate` module makes both as easy as typing `@auto` before your class declaration (in Babel/ES7 or TypeScript), and *almost* that easy in CoffeeScript or plain Javascript.
 
 <!--mockdown-setup: languages.js = 'babel'; languages.babel.options.stage=0; -->
@@ -178,7 +180,7 @@ Determining the correct way to do this in the language of your choice (other tha
 
 ### Return Value Handling
 
-`autocreate` respects the standard Javascript rules for constructor return values.  If your wrapped constructor returns an object or function, it will be returned in place of the newly-created instance -- regardless of whether the wrapper was called with `new` or not.
+`autocreate` respects the standard Javascript rules for constructor return values.  If your wrapped constructor returns an object or function, it will be returned in place of the newly-created instance -- regardless of whether the wrapper was called with `new` or not.  (Note: if you are running `autocreate` on a native ES6 class constructor rather than a transpiled one, the ES6 rules apply instead.)
 
 On the other hand, if you supply a `__class_call__` method, its return value will *always* be returned from the wrapper, regardless of type.  This allows the class to behave like a normal function, when it's called as one.
 
@@ -211,7 +213,7 @@ This will then return a `Subclass` instance when you call `Subclass()` without `
 
 ### Programmatic Subclass Creation
 
-As a convenience feature for metaprogramming, `autocreate` exposes a `.subclass(name?, base, props?)` utility function for creating ES6-style subclasses of `base` with the given `name` and descriptors (`props`).  If `name` is null or omitted, the base class name is used.  Static properties are inherited via `__proto__`:
+As a convenience feature for metaprogramming, `autocreate` exposes a `.subclass(name?, base, props?)` utility function for creating ES6-style subclasses of `base` (which must be a plain function or *emulated* class, rather than an *actual* ES6 class) with the given `name` and descriptors (`props`).  If `name` is null or omitted, the base class name is used.  Static properties are inherited via `__proto__`:
 
 ```js
 let sub = auto.subclass('sub', BaseClass, {foo: {value: "bar"}});
@@ -231,5 +233,5 @@ console.log(sub() instanceof BaseClass);
 >     bar
 >     true
 >     true
- 
-Note that this function doesn't allow you to change the base class's constructor behavior, though you can of course define a new `__class_call__` in the subclass's properties.  It's mainly useful for creating ES5/ES6-style subclasses when your favorite language only does ES3-style inheritance.
+
+Note that this function doesn't allow you to change the base class's constructor behavior, though you can of course define a new `__class_call__` in the subclass's properties.  It's mainly useful for creating ES5/ES6-style subclasses when your favorite language or target platform only does ES3-style inheritance.

@@ -23,10 +23,10 @@ withSpy = (ob, name, fn) ->
 
 checkTE = (fn, msg) -> fn.should.throw TypeError, msg
 
-
-
-
-
+haveClasses = no
+try
+    eval "class Native {}"
+    haveClasses = yes
 
 
 
@@ -80,16 +80,12 @@ describe "auto(constructor)", ->
 
 
 
-    describe "when called", (my) ->
+    whenCalledWith = (what, how) -> describe "when called with #{what}", (my) ->
 
         beforeEach -> @setup = (check = ->) ->
             my = this
             @invoked = invoked = spy.named 'constructor', check
-
-            class @cls
-                my.original = @
-                cls = auto @
-                constructor: -> return my.invoked.apply(this, arguments)
+            @cls = auto( my.original = cls = how(my) )
 
         describe "with new", ->
 
@@ -116,6 +112,10 @@ describe "auto(constructor)", ->
                     anObj = {}
                     @setup -> anObj
                     expect(new @cls).to.equal anObj
+
+
+
+
 
 
 
@@ -175,6 +175,35 @@ describe "auto(constructor)", ->
                         expect(@cls()).to.equal anObj
                         @invoked.should.have.been.calledOnce
 
+    whenCalledWith "emulated classes or standard funtions", (my) -> class cls
+        constructor: -> return my.invoked.apply(this, arguments)
+
+    whenCalledWith "real ES6 classes", (my) ->
+        my.skip() unless haveClasses
+        eval "class cls { constructor() { return my.invoked.apply(this, arguments); }}"
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 describe "auto.subclass(name?, base, props?)", ->
 
     class base
@@ -212,34 +241,6 @@ require('mockdown').testFiles(['README.md'], describe, it, skip: no, globals:
         foo.bar = {}
         foo
 )
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 

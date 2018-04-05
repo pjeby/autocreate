@@ -10,34 +10,34 @@ called.
     module.exports = auto = (cons) -> mkAuto(cons)
 
     mkAuto = (cons, name = cons.name, copier = copyProps) ->
-
-        cls = copier(cons, named(name, cons, ->
-
-If we were called with `new`, then `this` will an instance of the current class,
-and we can just apply the constructor.
-
-            if this instanceof cls
-                cons.apply(this, arguments)
-
+        if /^class/.test cons.toString()
+            # Harmony classes must be called w/new, always
+            cls = copier(cons, named(name, cons, (args...) ->
+                if this instanceof cls or not (cc = cls::__class_call__)
+                    return new (cons.bind.apply(cons, [cons].concat(args)))
+                else cc.apply(cls::, arguments)
+            ))
+        else
+            # Plain function or emulated class, use ES3 constructor rules
+            cls = copier(cons, named(name, cons, ->
+                if this instanceof cls then cons.apply(this, arguments)
+                    
 If we weren't called with a valid instance, but the prototype has a
 `__class_call__` method, we invoke that and return whatever it returns.
 
-            else if cc = cls::__class_call__
-                cc.apply(cls::, arguments)
+                else if cc = cls::__class_call__ then cc.apply(cls::, arguments)                
 
 Otherwise, we fall back to creating an instance, then applying the constructor
 to it, emulating Javascript's native behavior for constructor return values.
 
-            else
-                inst = new create()
-                ret = cons.apply(inst, arguments)
-                if Object(ret) is ret then ret else inst
+                else
+                    inst = new create()
+                    ret = cons.apply(inst, arguments)
+                    if Object(ret) is ret then ret else inst
+                )
             )
-        )
-
-        (create = ->):: = cls::
+            (create = ->):: = cls::
         return cls
-
 
 ## Wrapper Properties
 
