@@ -180,7 +180,7 @@ describe "auto(constructor)", ->
 
     whenCalledWith "real ES6 classes", (my) ->
         my.skip() unless haveClasses
-        eval "class cls { constructor() { return my.invoked.apply(this, arguments); }}"
+        eval "(class cls { constructor() { return my.invoked.apply(this, arguments); }})"
 
 
 
